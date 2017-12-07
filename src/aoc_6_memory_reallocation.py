@@ -1,4 +1,6 @@
-from src.utils import wrap_index
+from typing import List
+
+from src.utils import wrap_index, get_file_path
 
 """
 --- Day 6: Memory Reallocation ---
@@ -49,7 +51,6 @@ Given the initial block counts in your puzzle input, how many
 redistribution cycles must be completed before a configuration is produced
 that has been seen before?
 """
-from typing import List
 
 
 def cycles_before_infinite_loops(configuration):
@@ -57,7 +58,6 @@ def cycles_before_infinite_loops(configuration):
 
     while True:
         configuration = reallocate_memory(configuration)
-        print(configuration)
 
         if tuple(configuration) in already_seen_configurations:
             break
@@ -88,8 +88,12 @@ def parse_input(raw_in):
 
 
 if __name__ == '__main__':
-    raw_puzzle_input = '10	3	15	10	5	15	5	15	9	2	5	8	5	2	3	6'
+    input_file = get_file_path('memory_reallocation.txt')
+    with open(input_file) as f:
+        raw_puzzle_input = f.readline()
+
     puzzle_input = parse_input(raw_puzzle_input)
     reallocation_before_loop, final_configuration = cycles_before_infinite_loops(puzzle_input)
+    print(f'Result for Part 1: {reallocation_before_loop}')
     reallocation_before_loop, final_configuration = cycles_before_infinite_loops(final_configuration)
-    print(reallocation_before_loop)
+    print(f'Result for Part 1: {reallocation_before_loop - 1}')
