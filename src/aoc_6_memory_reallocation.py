@@ -1,3 +1,5 @@
+from src.utils import wrap_index
+
 """
 --- Day 6: Memory Reallocation ---
 
@@ -73,9 +75,7 @@ def reallocate_memory(memory_banks: List[int]):
     current_bank_idx = max_value_idx + 1
 
     while max_value > 0:
-
-        while current_bank_idx >= len(memory_banks):
-            current_bank_idx %= len(memory_banks)
+        current_bank_idx = wrap_index(current_bank_idx, memory_banks)
 
         memory_banks[current_bank_idx] += 1
         max_value -= 1
