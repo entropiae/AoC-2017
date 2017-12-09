@@ -14,3 +14,9 @@ def wrap_index(idx, xs):
 
 def get_element_in_position(idx, xs):
     return xs[wrap_index(idx, xs)]
+
+
+def head(xs):
+    if not xs:
+        raise ValueError('head() on empty list.')
+    return xs[0], xs[1:]

@@ -1,4 +1,5 @@
-from src.utils import get_file_path
+from src.utils import get_file_path, head
+from sys import setrecursionlimit
 
 """
 --- Day 9: Stream Processing ---
@@ -91,8 +92,39 @@ def count_groups(puzzle_input):
     return count(filter_garbage(filter_deletions(puzzle_input)))
 
 
-def count_garbage(puzzle_input):
-    return _count_garbage(filter_deletions(puzzle_input))
+def count(stream):
+    return _do_count(list(stream), 0, 0)
+
+
+def _do_count(stream, acc, unbalanced_groups_count):
+    if not stream:
+        return acc
+
+    h, t = head(stream)
+
+    if h == '{':
+        unbalanced_groups_count += 1
+    elif h == '}':
+        acc += unbalanced_groups_count
+        unbalanced_groups_count -= 1
+
+    return _do_count(t, acc, unbalanced_groups_count)
+
+
+def filter_deletions(stream):
+    """
+    Remove deletions from the stream
+    """
+    is_deleted = False
+
+    for c in stream:
+        if is_deleted:
+            is_deleted = False
+            continue
+        if c == '!':
+            is_deleted = True
+            continue
+        yield c
 
 
 def filter_garbage(stream):
@@ -112,6 +144,17 @@ def filter_garbage(stream):
         yield c
 
 
+def filter_comma(stream):
+    for c in stream:
+        if c == ',':
+            continue
+        yield c
+
+
+def count_garbage(puzzle_input):
+    return _count_garbage(filter_deletions(puzzle_input))
+
+
 def _count_garbage(stream):
     is_garbage = False
     counter = 0
@@ -129,44 +172,10 @@ def _count_garbage(stream):
     return counter
 
 
-def filter_deletions(stream):
-    """
-    Remove deletions from the stream
-    """
-    is_deleted = False
-
-    for c in stream:
-        if is_deleted:
-            is_deleted = False
-            continue
-        if c == '!':
-            is_deleted = True
-            continue
-        yield c
-
-
-def filter_comma(stream):
-    for c in stream:
-        if c == ',':
-            continue
-        yield c
-
-
-def count(stream):
-    return _do_count(iter(stream), 0, 0)
-
-
-def _do_count(stream, acc, counter):
-    for c in stream:
-        if c == '{':
-            counter += 1
-        elif c == '}':
-            acc += counter
-            counter -= 1
-    return acc
-
-
 if __name__ == '__main__':
+    # Avoid RecursionError with the default limit (1000)
+    setrecursionlimit(5000)
+
     file_path = get_file_path('stream_processing.txt')
 
     with open(file_path) as f:
