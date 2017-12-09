@@ -91,6 +91,10 @@ def count_groups(puzzle_input):
     return count(filter_garbage(filter_deletions(puzzle_input)))
 
 
+def count_garbage(puzzle_input):
+    return _count_garbage(filter_deletions(puzzle_input))
+
+
 def filter_garbage(stream):
     """
     Remove garbage group from the stream
@@ -106,6 +110,23 @@ def filter_garbage(stream):
         if is_garbage:
             continue
         yield c
+
+
+def _count_garbage(stream):
+    is_garbage = False
+    counter = 0
+    for c in stream:
+        if c == '>':
+            is_garbage = False
+            continue
+        if c == '<':
+            if is_garbage:
+                counter += 1
+            is_garbage = True
+            continue
+        if is_garbage:
+            counter += 1
+    return counter
 
 
 def filter_deletions(stream):
@@ -151,4 +172,8 @@ if __name__ == '__main__':
     with open(file_path) as f:
         puzzle_input = f.readline().strip()
 
-    print(count_groups(puzzle_input))
+    group_n = count_groups(puzzle_input)
+    print(f'Result for Part 1: {group_n}')
+
+    garbage_count = count_garbage(puzzle_input)
+    print(f'Result for Part 2: {garbage_count}')
