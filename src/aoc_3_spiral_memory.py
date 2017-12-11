@@ -1,6 +1,6 @@
 from itertools import count
 
-from functools import reduce
+from src.utils import compute_coordinates_from_steps
 
 """
 You come across an experimental new kind of memory stored on an infinite two-dimensional grid.
@@ -70,16 +70,6 @@ def generate_step():
             yield step, 0
         for _ in range(index):
             yield 0, step
-
-
-def compute_coordinates_from_steps(start, *steps):
-    """ Given a starting point and a sequence of cells, return the coordinate of the final point """
-    def _sum(p1, p2):
-        x1, y1 = p1
-        x2, y2 = p2
-        return x1 + x2, y1 + y2
-
-    return reduce(_sum, steps, start)
 
 
 def manhattan_distance(p1, p2):

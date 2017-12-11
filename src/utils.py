@@ -1,5 +1,6 @@
 import os.path
-from typing import List, Iterable, Any, TypeVar
+from functools import reduce
+from typing import List, Iterable, Any, TypeVar, Tuple
 
 T = TypeVar('T')
 
@@ -53,3 +54,22 @@ def head(xs):
 def chunks(l, n):
     for i in range(0, len(l), n):
         yield l[i:i + n]
+
+
+# Some typedef used through exercises
+Step = Tuple[int, int]
+Steps = List[Step]
+
+Point = Tuple[int, int]
+Points = List[Point]
+
+
+def compute_coordinates_from_steps(start: Point, *steps: Steps) -> Point:
+    """ Given a starting point and a sequence of cells, return the coordinate of the final point """
+
+    def _sum(p1: Point, p2: Step) -> Point:
+        x1, y1 = p1
+        x2, y2 = p2
+        return x1 + x2, y1 + y2
+
+    return reduce(_sum, steps, start)
