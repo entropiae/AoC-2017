@@ -18,6 +18,13 @@ def read_first_line(file_name):
         return f.readline().strip()
 
 
+def read_lines(file_name):
+    file_path = get_file_path(file_name)
+
+    with open(file_path) as f:
+        return [l.strip() for l in f]
+
+
 def wrap_index(idx: int, xs: List):
     idx %= len(xs)
     return idx
