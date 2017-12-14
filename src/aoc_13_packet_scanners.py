@@ -1,4 +1,10 @@
-from src.utils import read_lines
+from itertools import cycle, chain, count
+from sys import setrecursionlimit
+from typing import Tuple, Union, List, Iterator
+
+import itertools
+
+from src.utils import read_lines, head
 
 """
 --- Day 13: Packet Scanners ---
@@ -193,21 +199,90 @@ Given the details of the firewall you've recorded, if you leave immediately,
 what is the severity of your whole trip?
 """
 
+# A layer is described by a tuple composed by:
+#  - An integer, representing the depth of the layer
+#  - Another integer, representing the range of the layer
+#  - A generator, wich returns the next position of the scanner each
+#    time next() is called on it
+Layer = Tuple[int, int, Iterator[int]]
+Layers = List[Union[Layer, None]]
 
-def compute_cost(layer_configuration):
-    pass
+
+def compute_cost(layers, n_layer):
+    if not layers:
+        return 0
+
+    current_layer, other_layers = head(layers)
+
+    layer_severity = 0
+    if current_layer is not None:
+        scanner_position, _ = tick_layer(current_layer)
+
+        if scanner_position == 0:
+            d, r, _ = current_layer
+            layer_severity = d * r
+
+            if layer_severity != 0:
+                print(n_layer, r)
+                return layer_severity
+
+    other_layers = [tick_layer(l)[1] for l in other_layers]
+    return layer_severity + compute_cost(other_layers, n_layer+1)
+
+
+def get_ps_delay(puzzle_input):
+    for delay in count(3000, step=2):
+        tweaked_firewall_structure = ([None] * delay) + compose_firewall_structure(puzzle_input)
+        #print(len(tweaked_firewall_structure), end=' ')
+        cost = compute_cost(tweaked_firewall_structure, 0)
+
+        #print(f'{delay} -> {cost}')
+
+        if cost == 0:
+            return delay
+
+
+def tick_layer(layer: Layer) -> Tuple[int, Layer]:
+    next_scanner_position = None
+    if layer is not None:
+        _depth, _range, scanner_position = layer
+        next_scanner_position = next(scanner_position)
+    return next_scanner_position, layer
+
+
+def compose_firewall_structure(layer_configuration):
+    max_layer = max(layer_configuration.keys())
+
+    return [
+        (
+            depth,
+            layer_configuration[depth],
+            layer_gen(layer_configuration[depth])
+        ) if depth in layer_configuration else None
+        for depth in range(max_layer + 1)
+    ]
+
+
+def layer_gen(layer_range):
+    # return an iterator that return int from 0 to range and back
+    return cycle(chain(range(layer_range), reversed(range(1, layer_range - 1))))
 
 
 def parse_layer_configuration(raw_puzzle_input):
-    return [parse_row(r) for r in raw_puzzle_input]
+    return dict(parse_row(r) for r in raw_puzzle_input)
 
 
 def parse_row(row):
-    layer, depth = row.split(':')
-    return int(layer.strip()), int(depth.strip())
+    depth, scanner_range = row.split(':')
+    return int(depth.strip()), int(scanner_range.strip())
 
 
 if __name__ == '__main__':
-    puzzle_input = parse_layer_configuration(read_lines('packet_scanner.txt'))
-    cost = compute_cost(puzzle_input)
-    print(f'Result for Part 1: {cost}')
+    setrecursionlimit(5000)
+    #puzzle_input = parse_layer_configuration(read_lines('packet_scanners.txt'))
+    #firewall_structure = compose_firewall_structure(puzzle_input)
+    #cost = compute_cost(firewall_structure)
+    #print(f'Result for Part 1: {cost}')
+
+    #delay = get_ps_delay(puzzle_input)
+    #print(f'Result for Part 2: {delay}')
